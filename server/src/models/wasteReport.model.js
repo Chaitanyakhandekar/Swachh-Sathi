@@ -33,6 +33,14 @@ const wasteReportSchema = new mongoose.Schema({
         enum:["SMALL","MEDIUM","LARGE","HUGE"],
         default:"MEDIUM"
     },
+    wasteCollectedKg:{
+        type:Number,
+        default:0
+    },
+    co2ImpactKg:{
+        type:Number,
+        default:0
+    },
     status:{
         type:String,
         enum:["PENDING","VERIFIED","CLEANED","REJECTED"],

@@ -11,6 +11,7 @@ import ProtectedRoute from './components/guards/ProtectedRoute.jsx'
 import ProtectedRouteAuth from './components/guards/ProtectedRouteAuth.jsx'
 import { socket } from './socket/socket.js'
 import { socketEvents } from './constants/socketEvents.js'
+import AIChatbot from './components/swachh/AIChatbot.jsx'
 
 // Swachh Sathi Pages
 import Home from './pages/swachh/Home.jsx'
@@ -70,6 +71,7 @@ function App() {
       <Route path='/waste-reports' element={<ProtectedRoute><WasteReportPage /></ProtectedRoute>}/>
 
      </Routes>
+     <AIChatbot />
    </>
   )
 }

@@ -44,6 +44,7 @@ import adminRouter from "./routes/admin.route.js"
 import notificationRouter from "./routes/notification.route.js"
 import eventChatRouter from "./routes/eventChat.route.js"
 import wasteReportRouter from "./routes/wasteReport.route.js"
+import aiRouter from "./routes/ai.route.js"
 
 app.use("/api/groups",groupRoutes)
 
@@ -59,6 +60,7 @@ app.use("/api/admin",adminRouter)
 app.use("/api/notifications",notificationRouter)
 app.use("/api/event-chats",eventChatRouter)
 app.use("/api/waste",wasteReportRouter)
+app.use("/api/ai",aiRouter)
 
 // const PORT = process.env.PORT || 3000;
 // httpServer.listen(PORT, () => {

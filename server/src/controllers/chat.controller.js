@@ -121,20 +121,20 @@ const createGroupChat = asyncHandler(async (req, res) => {
 
     const newGroup = await Chat.create(groupData)
 
-    
+
     if (!newGroup) {
         throw new ApiError(500, "Server Error While Creating Group.")
     }
-    
+
     const newIndicator = await Message.create({
-        chatId:newGroup._id,
-        message:`${req.user.username} create this group`,
-        isIndicator:true,
-        sender:req.user._id
+        chatId: newGroup._id,
+        message: `${req.user.username} create this group`,
+        isIndicator: true,
+        sender: req.user._id
     })
-    
-    console.log("New Group Created :::::::::::::::::::::: ",newGroup )
-    console.log("New Indicator Message :: ",newIndicator)
+
+    console.log("New Group Created :::::::::::::::::::::: ", newGroup)
+    console.log("New Indicator Message :: ", newIndicator)
 
     const io = getIO();
 
@@ -168,8 +168,8 @@ const getUserChats = asyncHandler(async (req, res) => {
             }
         },
         {
-            $sort:{
-              sortTime:-1
+            $sort: {
+                sortTime: -1
             }
         },
         {
@@ -265,109 +265,109 @@ const getChatById = asyncHandler(async (req, res) => {
     )
 })
 
-const getUserChatUsers = asyncHandler(async (req,res)=>{
+const getUserChatUsers = asyncHandler(async (req, res) => {
     const users = await Chat.aggregate([
         {
-            $match:{
-              participants:new mongoose.Types.ObjectId(req.user._id),
-              isGroupChat:false
+            $match: {
+                participants: new mongoose.Types.ObjectId(req.user._id),
+                isGroupChat: false
             }
         },
         {
-            $lookup:{
-                from:"users",
-                localField:"participants",
-                foreignField:"_id",
-                as:"users",
-                pipeline:[
+            $lookup: {
+                from: "users",
+                localField: "participants",
+                foreignField: "_id",
+                as: "users",
+                pipeline: [
                     {
-                        $project:{
-                            username:1,
-                            name:1,
-                            avtar:1,
+                        $project: {
+                            username: 1,
+                            name: 1,
+                            avtar: 1,
                         }
                     },
-                   
+
                 ]
             }
         },
         {
-            $unwind:"$users"
+            $unwind: "$users"
         },
         {
-            $match:{
-                "users._id":{
-                    $ne:new mongoose.Types.ObjectId(req.user._id)
+            $match: {
+                "users._id": {
+                    $ne: new mongoose.Types.ObjectId(req.user._id)
                 }
             }
         }
         ,
         {
-            $replaceRoot:{
-                newRoot:"$users"
+            $replaceRoot: {
+                newRoot: "$users"
             }
-        }     
-       
+        }
+
     ])
 
-    if(!users){
-        throw new ApiError(400,"no users")
+    if (!users) {
+        throw new ApiError(400, "no users")
     }
 
     return res
         .status(200)
         .json(
-            new ApiResponse(200,users,"Fetched Users Successfully.")
+            new ApiResponse(200, users, "Fetched Users Successfully.")
         )
 })
 
-const getUserChatUsersServer = async (userId)=>{
+const getUserChatUsersServer = async (userId) => {
     const users = await Chat.aggregate([
         {
-            $match:{
-              participants:new mongoose.Types.ObjectId(userId),
-              isGroupChat:false
+            $match: {
+                participants: new mongoose.Types.ObjectId(userId),
+                isGroupChat: false
             }
         },
         {
-            $lookup:{
-                from:"users",
-                localField:"participants",
-                foreignField:"_id",
-                as:"users",
-                pipeline:[
+            $lookup: {
+                from: "users",
+                localField: "participants",
+                foreignField: "_id",
+                as: "users",
+                pipeline: [
                     {
-                        $project:{
-                            username:1,
-                            name:1,
-                            avtar:1,
+                        $project: {
+                            username: 1,
+                            name: 1,
+                            avtar: 1,
                         }
                     },
-                   
+
                 ]
             }
         },
         {
-            $unwind:"$users"
+            $unwind: "$users"
         },
         {
-            $match:{
-                "users._id":{
-                    $ne:new mongoose.Types.ObjectId(userId)
+            $match: {
+                "users._id": {
+                    $ne: new mongoose.Types.ObjectId(userId)
                 }
             }
         }
         ,
         {
-            $replaceRoot:{
-                newRoot:"$users"
+            $replaceRoot: {
+                newRoot: "$users"
             }
-        }     
-       
+        }
+
     ])
 
-    if(!users){
-       return []
+    if (!users) {
+        return []
     }
 
     return users
