@@ -9,8 +9,9 @@ import eventChatApi from '../../api/eventChat.api.js';
 import Navbar from '../../components/swachh/Navbar.jsx';
 import QRScanner from '../../components/swachh/QRScanner.jsx';
 import EventQRDisplay from '../../components/swachh/EventQRDisplay.jsx';
+import BeforeAfterGallery from '../../components/swachh/BeforeAfterGallery.jsx';
 import toast from 'react-hot-toast';
-import { MapPin, Calendar, Clock, Users, Award, CheckCircle, Upload, Image, ArrowLeft, Share2, X, Trash2, Send, Megaphone, MessageSquare, QrCode } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, Award, CheckCircle, Upload, Image, ArrowLeft, Share2, X, Trash2, Send, Megaphone, MessageSquare, QrCode, Layers } from 'lucide-react';
 
 const EventDetails = () => {
     const { eventId } = useParams();
@@ -35,6 +36,7 @@ const EventDetails = () => {
     const [showQRScanner, setShowQRScanner] = useState(false);
     const [showQRDisplay, setShowQRDisplay] = useState(false);
     const [qrInput, setQrInput] = useState('');
+    const [showBeforeAfter, setShowBeforeAfter] = useState(false);
 
     const isOrganizer = useMemo(() => {
         if (!user || !event) return false;
@@ -349,44 +351,69 @@ setSendingAnnouncement(false);
 
                         {/* Photos */}
                         <div className="bg-[#13151c] border border-white/5 rounded-2xl p-6">
-                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                                <Image size={20} className="text-green-400" />
-                                Event Gallery ({photos.length})
-                            </h3>
-                            {photos.length > 0 ? (
-                                <div className="grid grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
-                                    {photos.map((photo, index) => {
-                                        const canDelete = photo.uploadedBy?._id === user?._id || user?.role === 'ADMIN' || user?._id === event?.organizerId?._id;
-                                        return (
-                                            <div key={photo._id} className="relative group">
-                                                <img 
-                                                    src={photo.imageUrl} 
-                                                    alt="event" 
-                                                    className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                                                    onClick={() => { setSelectedPhoto(photo.imageUrl); setCurrentPhotoIndex(index); }}
-                                                />
-                                                {canDelete && (
-                                                    <button
-                                                        onClick={() => handleDeletePhoto(photo._id)}
-                                                        className="absolute top-1 right-1 p-1.5 bg-red-500/80 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                                                        title="Delete photo"
-                                                    >
-                                                        <Trash2 size={14} className="text-white" />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setShowBeforeAfter(false)}
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${
+                                            !showBeforeAfter ? 'bg-green-500 text-white' : 'text-gray-400 hover:text-white'
+                                        }`}
+                                    >
+                                        <Image size={18} />
+                                        Gallery ({photos.length})
+                                    </button>
+                                    <button
+                                        onClick={() => setShowBeforeAfter(true)}
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${
+                                            showBeforeAfter ? 'bg-green-500 text-white' : 'text-gray-400 hover:text-white'
+                                        }`}
+                                    >
+                                        <Layers size={18} />
+                                        Before/After
+                                    </button>
                                 </div>
-                            ) : (
-                                <p className="text-gray-500 mb-4">No photos uploaded yet</p>
-                            )}
-                            <div className="flex gap-3">
-                                <input type="file" accept="image/*" onChange={(e) => setSelectedFile(e.target.files[0])} className="flex-1 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-500 file:text-white hover:file:bg-green-600" />
-                                <button onClick={handleUploadPhoto} disabled={!selectedFile || uploading} className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition-all">
-                                    {uploading ? 'Uploading...' : 'Upload'}
-                                </button>
                             </div>
+
+                            {!showBeforeAfter ? (
+                                <>
+                                    {photos.length > 0 ? (
+                                        <div className="grid grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
+                                            {photos.map((photo, index) => {
+                                                const canDelete = photo.uploadedBy?._id === user?._id || user?.role === 'ADMIN' || user?._id === event?.organizerId?._id;
+                                                return (
+                                                    <div key={photo._id} className="relative group">
+                                                        <img 
+                                                            src={photo.imageUrl} 
+                                                            alt="event" 
+                                                            className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                                                            onClick={() => { setSelectedPhoto(photo.imageUrl); setCurrentPhotoIndex(index); }}
+                                                        />
+                                                        {canDelete && (
+                                                            <button
+                                                                onClick={() => handleDeletePhoto(photo._id)}
+                                                                className="absolute top-1 right-1 p-1.5 bg-red-500/80 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                                                                title="Delete photo"
+                                                            >
+                                                                <Trash2 size={14} className="text-white" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <p className="text-gray-500 mb-4">No photos uploaded yet</p>
+                                    )}
+                                    <div className="flex gap-3">
+                                        <input type="file" accept="image/*" onChange={(e) => setSelectedFile(e.target.files[0])} className="flex-1 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-500 file:text-white hover:file:bg-green-600" />
+                                        <button onClick={handleUploadPhoto} disabled={!selectedFile || uploading} className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition-all">
+                                            {uploading ? 'Uploading...' : 'Upload'}
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <BeforeAfterGallery eventId={eventId} isOrganizer={isOrganizer} />
+                            )}
                         </div>
                     </div>
 

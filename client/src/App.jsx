@@ -23,6 +23,7 @@ import CreateEvent from './pages/swachh/CreateEvent.jsx'
 import MyEvents from './pages/swachh/MyEvents.jsx'
 import AdminDashboard from './pages/swachh/AdminDashboard.jsx'
 import NotificationsPage from './pages/swachh/NotificationsPage.jsx'
+import WasteReportPage from './pages/swachh/WasteReportPage.jsx'
 
 function App() {
 
@@ -66,6 +67,7 @@ function App() {
       <Route path='/my-events' element={<ProtectedRoute><MyEvents /></ProtectedRoute>}/>
       <Route path='/admin' element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}/>
       <Route path='/notifications' element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>}/>
+      <Route path='/waste-reports' element={<ProtectedRoute><WasteReportPage /></ProtectedRoute>}/>
 
      </Routes>
    </>

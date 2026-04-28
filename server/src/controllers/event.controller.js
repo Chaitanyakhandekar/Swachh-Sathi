@@ -242,14 +242,20 @@ const getEventsByCity = asyncHandler(async (req, res) => {
 
 const getMyEvents = asyncHandler(async (req, res) => {
     const { status } = req.query;
-    const filter = { organizerId: req.user._id };
-    if (status) filter.status = status;
+    const filter = {};
+
+    if (req.user.role === "ADMIN") {
+        if (status) filter.status = status;
+    } else {
+        filter.organizerId = req.user._id;
+        if (status) filter.status = status;
+    }
 
     const events = await Event.find(filter)
         .populate("locationId", "name address city")
         .sort({ date: -1 });
 
-    return res.status(200).json(new ApiResponse(200, events, "Your events fetched successfully."));
+    return res.status(200).json(new ApiResponse(200, events, "Events fetched successfully."));
 });
 
 const getEventQRCode = asyncHandler(async (req, res) => {

@@ -22,10 +22,21 @@ const eventPhotoSchema = new mongoose.Schema({
     caption:{
         type:String,
         trim:true
+    },
+    type:{
+        type:String,
+        enum:["BEFORE","AFTER","GALLERY"],
+        default:"GALLERY"
+    },
+    transformationId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"EventPhoto",
+        default:null
     }
 },
 {timestamps:true})
 
 eventPhotoSchema.index({ eventId: 1 });
+eventPhotoSchema.index({ eventId: 1, type: 1 });
 
 export const EventPhoto = mongoose.model("EventPhoto",eventPhotoSchema);
