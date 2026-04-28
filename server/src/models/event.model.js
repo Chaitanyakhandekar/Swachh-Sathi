@@ -66,6 +66,10 @@ const eventSchema = new mongoose.Schema({
     isVerified:{
         type:Boolean,
         default:false
+    },
+    qrCode:{
+        type:String,
+        default:null
     }
 },
 {timestamps:true})

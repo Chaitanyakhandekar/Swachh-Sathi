@@ -42,7 +42,7 @@ const verifyEventCompletion = asyncHandler(async (req, res) => {
     });
 
     if (status === "COMPLETED") {
-        const volunteers = await EventVolunteer.find({ eventId }).populate('userId');
+        const volunteers = await EventVolunteer.find({ eventId, status: "PRESENT" }).populate('userId');
         const recipientIds = volunteers.map(v => v.userId._id);
         const creditAmount = event.creditsReward;
 
@@ -101,7 +101,7 @@ const changeEventStatus = asyncHandler(async (req, res) => {
     });
 
     if (status === "COMPLETED") {
-        const volunteers = await EventVolunteer.find({ eventId }).populate('userId');
+        const volunteers = await EventVolunteer.find({ eventId, status: "PRESENT" }).populate('userId');
         const recipientIds = volunteers.map(v => v.userId._id);
         const creditAmount = event.creditsReward;
 

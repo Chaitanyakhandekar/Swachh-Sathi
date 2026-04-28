@@ -16,6 +16,7 @@ import { socketEvents } from './constants/socketEvents.js'
 import Home from './pages/swachh/Home.jsx'
 import NearbyEvents from './pages/swachh/NearbyEvents.jsx'
 import EventDetails from './pages/swachh/EventDetails.jsx'
+import EventCheckIn from './pages/swachh/EventCheckIn.jsx'
 import Profile from './pages/swachh/Profile.jsx'
 import Leaderboard from './pages/swachh/Leaderboard.jsx'
 import CreateEvent from './pages/swachh/CreateEvent.jsx'
@@ -58,6 +59,7 @@ function App() {
       <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>}/>
       <Route path='/nearby' element={<ProtectedRoute><NearbyEvents /></ProtectedRoute>}/>
       <Route path='/event/:eventId' element={<ProtectedRoute><EventDetails /></ProtectedRoute>}/>
+      <Route path='/event/:eventId/checkin' element={<ProtectedRoute><EventCheckIn /></ProtectedRoute>}/>
       <Route path='/profile' element={<ProtectedRoute><Profile /></ProtectedRoute>}/>
       <Route path='/leaderboard' element={<ProtectedRoute><Leaderboard /></ProtectedRoute>}/>
       <Route path='/create-event' element={<ProtectedRoute><CreateEvent /></ProtectedRoute>}/>

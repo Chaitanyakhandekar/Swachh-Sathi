@@ -7,6 +7,30 @@ import { EventStatusLog } from "../models/eventStatusLog.model.js";
 import { cacheService } from "../services/cache.service.js";
 import { EventVolunteer } from "../models/eventVolunteer.model.js";
 import { redis } from "../redis/config.js";
+import QRCode from "qrcode";
+
+const generateQRCode = () => {
+    return Math.random().toString(36).substring(2, 10).toUpperCase() + 
+           Date.now().toString(36).toUpperCase();
+};
+
+const generateQRCodeImage = async (qrCodeString, eventId) => {
+    try {
+        const checkInUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/event/${eventId}/checkin?code=${qrCodeString}`;
+        const qrCodeDataUrl = await QRCode.toDataURL(checkInUrl, {
+            width: 300,
+            margin: 2,
+            color: {
+                dark: '#000000',
+                light: '#ffffff'
+            }
+        });
+        return qrCodeDataUrl;
+    } catch (error) {
+        console.error('Error generating QR code image:', error);
+        return null;
+    }
+};
 
 const createEvent = asyncHandler(async (req, res) => {
     const { title, description, date, startTime, endTime, locationId, maxVolunteers, creditsReward } = req.body;
@@ -20,6 +44,8 @@ const createEvent = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Location not found.");
     }
 
+    const qrCode = generateQRCode();
+
     const event = await Event.create({
         title,
         description,
@@ -30,7 +56,8 @@ const createEvent = asyncHandler(async (req, res) => {
         organizerId: req.user._id,
         maxVolunteers: maxVolunteers || 100,
         creditsReward: creditsReward || 10,
-        location: location.location
+        location: location.location,
+        qrCode
     });
 
     await cacheService.invalidateAllEventsCache();
@@ -225,6 +252,72 @@ const getMyEvents = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, events, "Your events fetched successfully."));
 });
 
+const getEventQRCode = asyncHandler(async (req, res) => {
+    const { eventId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        throw new ApiError(400, "Valid event ID is required.");
+    }
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+        throw new ApiError(404, "Event not found.");
+    }
+
+    if (event.organizerId.toString() !== req.user._id.toString() && req.user.role !== "ADMIN") {
+        throw new ApiError(403, "You are not authorized to view this QR code.");
+    }
+
+    return res.status(200).json(new ApiResponse(200, { qrCode: event.qrCode }, "QR code fetched successfully."));
+});
+
+const regenerateEventQRCode = asyncHandler(async (req, res) => {
+    const { eventId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        throw new ApiError(400, "Valid event ID is required.");
+    }
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+        throw new ApiError(404, "Event not found.");
+    }
+
+    if (event.organizerId.toString() !== req.user._id.toString() && req.user.role !== "ADMIN") {
+        throw new ApiError(403, "You are not authorized to regenerate this QR code.");
+    }
+
+    const newQRCode = generateQRCode();
+    event.qrCode = newQRCode;
+    await event.save();
+
+    return res.status(200).json(new ApiResponse(200, { qrCode: newQRCode }, "QR code regenerated successfully."));
+});
+
+const getEventQRCodeImage = asyncHandler(async (req, res) => {
+    const { eventId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        throw new ApiError(400, "Valid event ID is required.");
+    }
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+        throw new ApiError(404, "Event not found.");
+    }
+
+    if (event.organizerId.toString() !== req.user._id.toString() && req.user.role !== "ADMIN") {
+        throw new ApiError(403, "You are not authorized to view this QR code.");
+    }
+
+    const qrCodeImage = await generateQRCodeImage(event.qrCode, eventId);
+    if (!qrCodeImage) {
+        throw new ApiError(500, "Failed to generate QR code image.");
+    }
+
+    return res.status(200).json(new ApiResponse(200, { qrCodeImage, qrCode: event.qrCode }, "QR code image generated successfully."));
+});
+
 export {
     createEvent,
     getAllEvents,
@@ -233,5 +326,8 @@ export {
     updateEvent,
     deleteEvent,
     getEventsByCity,
-    getMyEvents
+    getMyEvents,
+    getEventQRCode,
+    regenerateEventQRCode,
+    getEventQRCodeImage
 };

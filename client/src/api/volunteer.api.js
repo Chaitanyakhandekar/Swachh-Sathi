@@ -49,6 +49,15 @@ class VolunteerApi{
             return { success: false, message: error.response?.data?.message || error.message, error };
         }
     }
+
+    checkIn = async (eventId, qrCode) => {
+        try {
+            const response = await axios.post(`${this.baseUrl}/check-in`, { eventId, qrCode }, { withCredentials: true });
+            return { success: true, message: response.data.message, data: response.data.data };
+        } catch (error) {
+            return { success: false, message: error.response?.data?.message || error.message, error };
+        }
+    }
 }
 
 export const volunteerApi = new VolunteerApi();

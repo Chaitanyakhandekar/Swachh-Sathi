@@ -146,10 +146,51 @@ const getMyVolunteerEvents = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, events, "Your volunteer events fetched successfully."));
 });
 
+const checkInWithQR = asyncHandler(async (req, res) => {
+    const { eventId, qrCode } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        throw new ApiError(400, "Valid event ID is required.");
+    }
+
+    if (!qrCode) {
+        throw new ApiError(400, "QR code is required.");
+    }
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+        throw new ApiError(404, "Event not found.");
+    }
+
+    if (event.status !== "ONGOING" && event.status !== "UPCOMING") {
+        throw new ApiError(400, "Event is not available for check-in.");
+    }
+
+    if (event.qrCode !== qrCode) {
+        throw new ApiError(400, "Invalid QR code.");
+    }
+
+    const volunteer = await EventVolunteer.findOne({ eventId, userId: req.user._id });
+    if (!volunteer) {
+        throw new ApiError(404, "You have not joined this event.");
+    }
+
+    if (volunteer.status === "PRESENT") {
+        throw new ApiError(400, "You have already checked in.");
+    }
+
+    volunteer.status = "PRESENT";
+    volunteer.attendanceMarkedAt = new Date();
+    await volunteer.save();
+
+    return res.status(200).json(new ApiResponse(200, volunteer, "Check-in successful! You earned credits for this event."));
+});
+
 export {
     joinEvent,
     leaveEvent,
     getEventVolunteers,
     markAttendance,
-    getMyVolunteerEvents
+    getMyVolunteerEvents,
+    checkInWithQR
 };

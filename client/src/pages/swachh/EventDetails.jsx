@@ -7,8 +7,10 @@ import { notificationApi } from '../../api/notification.api.js';
 import { authContext } from '../../context/AuthProvider.jsx';
 import eventChatApi from '../../api/eventChat.api.js';
 import Navbar from '../../components/swachh/Navbar.jsx';
+import QRScanner from '../../components/swachh/QRScanner.jsx';
+import EventQRDisplay from '../../components/swachh/EventQRDisplay.jsx';
 import toast from 'react-hot-toast';
-import { MapPin, Calendar, Clock, Users, Award, CheckCircle, Upload, Image, ArrowLeft, Share2, X, Trash2, Send, Megaphone, MessageSquare } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, Award, CheckCircle, Upload, Image, ArrowLeft, Share2, X, Trash2, Send, Megaphone, MessageSquare, QrCode } from 'lucide-react';
 
 const EventDetails = () => {
     const { eventId } = useParams();
@@ -30,6 +32,9 @@ const EventDetails = () => {
     const [chatInput, setChatInput] = useState('');
     const [chatLoading, setChatLoading] = useState(false);
     const [chatClosed, setChatClosed] = useState(false);
+    const [showQRScanner, setShowQRScanner] = useState(false);
+    const [showQRDisplay, setShowQRDisplay] = useState(false);
+    const [qrInput, setQrInput] = useState('');
 
     const isOrganizer = useMemo(() => {
         if (!user || !event) return false;
@@ -37,6 +42,7 @@ const EventDetails = () => {
     }, [user, event]);
 
     const canChat = useMemo(() => joined || isOrganizer, [joined, isOrganizer]);
+    const isJoined = joined;
 
     useEffect(() => {
         fetchEventDetails();
@@ -93,6 +99,26 @@ const EventDetails = () => {
         const result = await volunteerApi.leaveEvent(eventId);
         if (result.success) {
             toast.success(result.message);
+            fetchEventDetails();
+        } else {
+            toast.error(result.message);
+        }
+    };
+
+    const handleCheckIn = async (qrCodeValue, scannedEventId) => {
+        const codeToUse = qrCodeValue || qrInput;
+        const eventIdToUse = scannedEventId || eventId;
+        
+        if (!codeToUse.trim()) {
+            toast.error('Please enter or scan the QR code');
+            return;
+        }
+        
+        const result = await volunteerApi.checkIn(eventIdToUse, codeToUse.trim());
+        if (result.success) {
+            toast.success(result.message);
+            setShowQRScanner(false);
+            setQrInput('');
             fetchEventDetails();
         } else {
             toast.error(result.message);
@@ -293,14 +319,26 @@ setSendingAnnouncement(false);
                             <div className="px-6 lg:px-8 pb-6 lg:pb-8 flex flex-wrap gap-3">
                                 {canJoin && (
                                     isJoined ? (
-                                        <button onClick={handleLeave} className="flex-1 min-w-[140px] px-6 py-3 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl font-medium hover:bg-red-500/20 transition-all">
-                                            Leave Event
-                                        </button>
+                                        <>
+                                            <button onClick={() => setShowQRScanner(true)} className="flex-1 min-w-[140px] px-6 py-3 bg-green-500/10 text-green-400 border border-green-500/20 rounded-xl font-medium hover:bg-green-500/20 transition-all flex items-center justify-center gap-2">
+                                                <Award size={18} />
+                                                Check In
+                                            </button>
+                                            <button onClick={handleLeave} className="flex-1 min-w-[140px] px-6 py-3 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl font-medium hover:bg-red-500/20 transition-all">
+                                                Leave Event
+                                            </button>
+                                        </>
                                     ) : (
                                         <button onClick={handleJoin} className="flex-1 min-w-[140px] px-6 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-all shadow-lg shadow-green-500/20">
                                             Join Event
                                         </button>
                                     )
+                                )}
+                                {isOrganizer && (
+                                    <button onClick={() => setShowQRDisplay(true)} className="flex-1 min-w-[140px] px-6 py-3 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-xl font-medium hover:bg-blue-500/20 transition-all flex items-center justify-center gap-2">
+                                        <QrCode size={18} />
+                                        Show QR
+                                    </button>
                                 )}
                                 <button className="flex-1 min-w-[140px] px-6 py-3 bg-white/5 text-white border border-white/10 rounded-xl font-medium hover:bg-white/10 transition-all flex items-center justify-center gap-2">
                                     <Share2 size={18} />
@@ -535,6 +573,26 @@ setSendingAnnouncement(false);
                     </div>
                 )}
             </main>
+
+            {/* QR Scanner Modal */}
+            {showQRScanner && (
+                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+                    <QRScanner 
+                        onScanSuccess={(code, scannedEventId) => handleCheckIn(code, scannedEventId)} 
+                        onClose={() => { setShowQRScanner(false); setQrInput(''); }} 
+                    />
+                </div>
+            )}
+
+            {/* QR Display Modal for Organizer */}
+            {showQRDisplay && (
+                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+                    <EventQRDisplay 
+                        eventId={eventId} 
+                        onClose={() => setShowQRDisplay(false)} 
+                    />
+                </div>
+            )}
         </div>
     );
 };

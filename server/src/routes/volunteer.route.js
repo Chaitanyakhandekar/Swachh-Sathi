@@ -6,7 +6,8 @@ import {
     leaveEvent,
     getEventVolunteers,
     markAttendance,
-    getMyVolunteerEvents
+    getMyVolunteerEvents,
+    checkInWithQR
 } from "../controllers/volunteer.controller.js";
 
 const router = Router();
@@ -16,5 +17,6 @@ router.route("/:eventId/leave").post(userAuth, leaveEvent);
 router.route("/:eventId/volunteers").get(userAuth, getEventVolunteers);
 router.route("/mark-attendance").post(userAuth, isOrganizer, markAttendance);
 router.route("/my-events").get(userAuth, getMyVolunteerEvents);
+router.route("/check-in").post(userAuth, checkInWithQR);
 
 export default router;
