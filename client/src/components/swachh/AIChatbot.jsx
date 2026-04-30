@@ -64,17 +64,18 @@ const AIChatbot = () => {
 
     const handleSend = async () => {
         if (!input.trim() || loading) return;
-        
+
         const userMsg = input.trim();
         setInput('');
         setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
         setLoading(true);
-        
+
         try {
             const result = await aiApi.chat(userMsg);
-            
-            if (result.success && result.data?.response) {
-                setMessages(prev => [...prev, { role: 'bot', text: result.data.response }]);
+            console.log("MESSAGE CHATBOT :::::::: ", result.message)
+
+            if (result.success && result.message.trim().length > 0) {
+                setMessages(prev => [...prev, { role: 'bot', text: result.message }]);
             } else {
                 const fallback = getFallback(userMsg);
                 if (fallback) {
@@ -91,7 +92,7 @@ const AIChatbot = () => {
                 setMessages(prev => [...prev, { role: 'bot', text: "I'm having trouble connecting right now. Please try again!" }]);
             }
         }
-        
+
         setLoading(false);
     };
 
@@ -128,15 +129,14 @@ const AIChatbot = () => {
                     </button>
                 </div>
             </div>
-            
+
             <div className="h-80 overflow-y-auto p-4 space-y-4">
                 {messages.map((msg, idx) => (
                     <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] px-4 py-2 rounded-2xl ${
-                            msg.role === 'user' 
-                                ? 'bg-green-500 text-white rounded-br-md' 
-                                : 'bg-white/10 text-gray-200 rounded-bl-md'
-                        }`}>
+                        <div className={`max-w-[85%] px-4 py-2 rounded-2xl ${msg.role === 'user'
+                            ? 'bg-green-500 text-white rounded-br-md'
+                            : 'bg-white/10 text-gray-200 rounded-bl-md'
+                            }`}>
                             {msg.role === 'bot' && <Bot size={12} className="text-green-400 mb-1" />}
                             <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
                         </div>
@@ -151,7 +151,7 @@ const AIChatbot = () => {
                 )}
                 <div ref={messagesEndRef} />
             </div>
-            
+
             <div className="p-3 border-t border-white/10">
                 <div className="flex gap-2">
                     <input
@@ -162,7 +162,7 @@ const AIChatbot = () => {
                         placeholder="Ask a question..."
                         className="flex-1 bg-[#0a0b0f] border border-white/10 rounded-xl px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-green-500/50"
                     />
-                    <button 
+                    <button
                         onClick={handleSend}
                         disabled={!input.trim() || loading}
                         className="p-2 bg-green-500 text-white rounded-xl hover:bg-green-600 disabled:opacity-50"

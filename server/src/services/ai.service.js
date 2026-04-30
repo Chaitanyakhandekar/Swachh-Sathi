@@ -1,47 +1,69 @@
-import dotenv from "dotenv";
+import { GoogleGenAI } from "@google/genai"
+import { z } from "zod"
+import { zodToJsonSchema } from "zod-to-json-schema"
 
-dotenv.config();
 
-const getAIResponse = async (userMessage) => {
-    try {
-        const { GoogleGenAI } = await import("@google/genai");
-        
-        if (!process.env.GOOGLE_GENAI_API_KEY) {
-            throw new Error("GOOGLE_GENAI_API_KEY not configured");
-        }
-        
-        const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_GENAI_API_KEY });
+const ai = new GoogleGenAI({
+  apiKey: process.env.GOOGLE_GENAI_API_KEY
+})
 
-        const systemPrompt = `You are Swachh Sathi AI Assistant for a volunteer management platform. Your role is to help users with:
-1. EVENT PARTICIPATION: How to join events, participate as volunteer, find nearby events
-2. QR CHECK-IN: How to scan QR codes, mark attendance, get credits
-3. CREDITS & REWARDS: Earning credits, rewards system, leaderboard
-4. EVENT CREATION: How organizers create events, manage volunteers
-5. WASTE REPORTING: Report garbage spots, track cleanup progress
-6. BADGES: Achievement system, unlocking badges
-7. ADMIN: Verify completions, manage users, dashboard
-Be helpful, concise, and friendly.`;
 
-        const fullPrompt = `${systemPrompt}\n\nUser question: ${userMessage}`;
-        
-        const result = await genAI.models.generateContent({
-            model: 'gemini-2.0-flash',
-            contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
-        });
-        
-        const response = result.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
-        
-        return {
-            success: true,
-            response: response
-        };
-    } catch (error) {
-        console.error("AI Service Error:", error.message);
-        return {
-            success: false,
-            response: "Sorry, I'm having trouble answering that right now. Please try again."
-        };
+function formatMessages(messages) {
+  return messages
+    .map(msg => `${msg.sender.username}: ${msg.message}`)
+    .join("\n");
+}
+
+async function summarizeChat(messages) {
+  const formattedChat = formatMessages(messages);
+
+  const prompt = `
+Analyze the following chat conversation and return a structured summary.
+
+Chat:
+${formattedChat}
+
+Return output in this JSON format:
+{
+  "messages": number,
+  "timespan": "string",
+  "sentiment": "Positive | Neutral | Negative",
+  "overview": "2-3 line summary",
+  "keyPoints": ["point1", "point2", "point3", "point4"]
+}
+`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json"
     }
-};
+  });
 
-export { getAIResponse };
+  const data = JSON.parse(response.text);
+
+  return data;
+}
+
+const getAIResponseService = async (prompt) => {
+  console.log("PROMPT : ", prompt)
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      // responseMimeType: "application/json"
+    }
+  });
+  console.log("RESPONSE : ", response.text)
+
+  const data = response.text;
+
+  return data;
+}
+
+
+export {
+  summarizeChat,
+  getAIResponseService
+}
