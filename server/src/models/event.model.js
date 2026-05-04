@@ -70,6 +70,14 @@ const eventSchema = new mongoose.Schema({
     qrCode:{
         type:String,
         default:null
+    },
+    wasteCollectedKg:{
+        type:Number,
+        default:0
+    },
+    co2ImpactKg:{
+        type:Number,
+        default:0
     }
 },
 {timestamps:true})

@@ -6,7 +6,7 @@ import { adminApi } from '../../api/admin.api.js';
 import { authContext } from '../../context/AuthProvider.jsx';
 import Navbar from '../../components/swachh/Navbar.jsx';
 import toast from 'react-hot-toast';
-import { MapPin, Calendar, Users, Trophy, TrendingUp, Clock, Search, Filter, Plus } from 'lucide-react';
+import { MapPin, Calendar, Users, Trophy, TrendingUp, Clock, Search, Filter, Plus, Trash2, Leaf } from 'lucide-react';
 
 const Home = () => {
     const { user } = useContext(authContext);
@@ -103,13 +103,12 @@ const Home = () => {
 
                     {/* Stats Cards */}
                     {stats && (
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
                             <div className="bg-gradient-to-br from-green-500/10 to-emerald-600/5 border border-green-500/10 rounded-2xl p-5 hover:border-green-500/30 transition-all">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
                                         <Calendar size={20} className="text-green-400" />
                                     </div>
-                                    <TrendingUp size={16} className="text-green-400" />
                                 </div>
                                 <p className="text-2xl font-bold text-white">{stats.totalEvents}</p>
                                 <p className="text-sm text-gray-400">Total Events</p>
@@ -119,10 +118,10 @@ const Home = () => {
                                     <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
                                         <Clock size={20} className="text-blue-400" />
                                     </div>
-                                    <span className="text-xs text-blue-400 bg-blue-500/20 px-2 py-1 rounded-full">Active</span>
+                                    <span className="text-xs text-blue-400 bg-blue-500/20 px-2 py-1 rounded-full">Live</span>
                                 </div>
-                                <p className="text-2xl font-bold text-white">{stats.upcomingEvents}</p>
-                                <p className="text-sm text-gray-400">Upcoming Events</p>
+                                <p className="text-2xl font-bold text-white">{stats.ongoingEvents || 0}</p>
+                                <p className="text-sm text-gray-400">Active Events</p>
                             </div>
                             <div className="bg-gradient-to-br from-purple-500/10 to-pink-600/5 border border-purple-500/10 rounded-2xl p-5 hover:border-purple-500/30 transition-all">
                                 <div className="flex items-center justify-between mb-3">
@@ -130,17 +129,26 @@ const Home = () => {
                                         <Users size={20} className="text-purple-400" />
                                     </div>
                                 </div>
-                                <p className="text-2xl font-bold text-white">{stats.totalVolunteers}</p>
-                                <p className="text-sm text-gray-400">Volunteers</p>
+                                <p className="text-2xl font-bold text-white">{stats.activeVolunteers}</p>
+                                <p className="text-sm text-gray-400">Active Volunteers</p>
+                            </div>
+                            <div className="bg-gradient-to-br from-red-500/10 to-orange-600/5 border border-red-500/10 rounded-2xl p-5 hover:border-red-500/30 transition-all">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center">
+                                        <Trash2 size={20} className="text-red-400" />
+                                    </div>
+                                </div>
+                                <p className="text-2xl font-bold text-white">{stats.totalWasteCollectedKg || 0}kg</p>
+                                <p className="text-sm text-gray-400">Waste Collected</p>
                             </div>
                             <div className="bg-gradient-to-br from-amber-500/10 to-orange-600/5 border border-amber-500/10 rounded-2xl p-5 hover:border-amber-500/30 transition-all">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                                        <Trophy size={20} className="text-amber-400" />
+                                        <Leaf size={20} className="text-amber-400" />
                                     </div>
                                 </div>
-                                <p className="text-2xl font-bold text-white">{stats.totalCredits}</p>
-                                <p className="text-sm text-gray-400">Total Credits Earned</p>
+                                <p className="text-2xl font-bold text-white">{stats.totalCo2ImpactKg || 0}kg</p>
+                                <p className="text-sm text-gray-400">CO₂ Impact</p>
                             </div>
                         </div>
                     )}

@@ -9,7 +9,7 @@ import { cacheService } from "../services/cache.service.js";
 import { notifyMultipleRealTime } from "../services/notification.service.js";
 
 const verifyEventCompletion = asyncHandler(async (req, res) => {
-    const { eventId, status, reason } = req.body;
+    const { eventId, status, reason, wasteCollectedKg, co2ImpactKg } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
         throw new ApiError(400, "Valid event ID is required.");
@@ -31,6 +31,12 @@ const verifyEventCompletion = asyncHandler(async (req, res) => {
     const previousStatus = event.status;
     event.status = status;
     event.isVerified = true;
+    
+    if (status === "COMPLETED") {
+        event.wasteCollectedKg = wasteCollectedKg || 0;
+        event.co2ImpactKg = co2ImpactKg || 0;
+    }
+    
     await event.save();
 
     await EventStatusLog.create({
@@ -167,18 +173,30 @@ const getLeaderboard = asyncHandler(async (req, res) => {
 });
 
 const getStats = asyncHandler(async (req, res) => {
-    const totalEvents = await Event.countDocuments();
-    const upcomingEvents = await Event.countDocuments({ status: "UPCOMING" });
-    const completedEvents = await Event.countDocuments({ status: "COMPLETED" });
-    const totalVolunteers = await EventVolunteer.distinct("userId");
+    const [totalEvents, upcomingEvents, completedEvents, ongoingEvents] = await Promise.all([
+        Event.countDocuments(),
+        Event.countDocuments({ status: "UPCOMING" }),
+        Event.countDocuments({ status: "COMPLETED" }),
+        Event.countDocuments({ status: "ONGOING" })
+    ]);
+    
+    const activeVolunteers = await EventVolunteer.distinct("userId");
     const totalCredits = await User.aggregate([{ $group: { _id: null, total: { $sum: "$credits" } } }]);
+    
+    const wasteByStatus = await Event.aggregate([
+        { $match: { status: "COMPLETED" } },
+        { $group: { _id: null, totalWaste: { $sum: "$wasteCollectedKg" }, totalCO2: { $sum: "$co2ImpactKg" } } }
+    ]);
 
     const stats = {
         totalEvents,
         upcomingEvents,
+        ongoingEvents,
         completedEvents,
-        totalVolunteers: totalVolunteers.length,
-        totalCredits: totalCredits[0]?.total || 0
+        activeVolunteers: activeVolunteers.length,
+        totalCredits: totalCredits[0]?.total || 0,
+        totalWasteCollectedKg: wasteByStatus[0]?.totalWaste || 0,
+        totalCo2ImpactKg: wasteByStatus[0]?.totalCO2 || 0
     };
 
     return res.status(200).json(new ApiResponse(200, stats, "Stats fetched successfully."));

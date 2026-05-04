@@ -11,6 +11,7 @@ import ProtectedRoute from './components/guards/ProtectedRoute.jsx'
 import ProtectedRouteAuth from './components/guards/ProtectedRouteAuth.jsx'
 import { socket } from './socket/socket.js'
 import { socketEvents } from './constants/socketEvents.js'
+import AIChatbot from './components/swachh/AIChatbot.jsx'
 
 // Swachh Sathi Pages
 import Home from './pages/swachh/Home.jsx'
@@ -23,6 +24,7 @@ import CreateEvent from './pages/swachh/CreateEvent.jsx'
 import MyEvents from './pages/swachh/MyEvents.jsx'
 import AdminDashboard from './pages/swachh/AdminDashboard.jsx'
 import NotificationsPage from './pages/swachh/NotificationsPage.jsx'
+import WasteReportPage from './pages/swachh/WasteReportPage.jsx'
 
 function App() {
 
@@ -66,8 +68,10 @@ function App() {
       <Route path='/my-events' element={<ProtectedRoute><MyEvents /></ProtectedRoute>}/>
       <Route path='/admin' element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}/>
       <Route path='/notifications' element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>}/>
+      <Route path='/waste-reports' element={<ProtectedRoute><WasteReportPage /></ProtectedRoute>}/>
 
      </Routes>
+     <AIChatbot />
    </>
   )
 }

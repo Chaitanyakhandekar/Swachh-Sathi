@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google/genai": "^1.50.1",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.8.0",
     "cookie-parser": "^1.4.7",
@@ -30,7 +31,9 @@
     "qrcode": "^1.5.4",
     "sib-api-v3-sdk": "^8.5.0",
     "slugify": "^1.6.6",
-    "socket.io": "^4.8.3"
+    "socket.io": "^4.8.3",
+    "zod": "^4.3.6",
+    "zod-to-json-schema": "^3.25.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"

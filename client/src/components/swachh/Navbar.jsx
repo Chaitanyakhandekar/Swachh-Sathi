@@ -17,7 +17,8 @@ import {
   X,
   Award,
   BarChart3,
-  Shield
+  Shield,
+  Trash2
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -40,6 +41,7 @@ const Navbar = () => {
     { to: "/home", icon: Home, label: "Home" },
     { to: "/nearby", icon: MapPin, label: "Nearby Events" },
     { to: "/my-events", icon: Calendar, label: "My Events" },
+    { to: "/waste-reports", icon: Trash2, label: "Waste Reports" },
     { to: "/leaderboard", icon: Trophy, label: "Leaderboard" },
   ];
 

@@ -17,7 +17,8 @@ const registerUser = asyncHandler(async (req, res, next) => {
     username,
     name,
     email,
-    password
+    password,
+    city
   } = req.body
 
   if ([username, name, email, password].some((field) => (!field || field.trim() === ""))) {
@@ -47,6 +48,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
     name,
     email,
     password,
+    city: city || "",
     avtar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`
   })
 
